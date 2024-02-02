@@ -1,13 +1,14 @@
 #!/usr/bin/env fish
 
-echo "Syncing ~/dotfiles/ to ~"
+echo "Syncing '/home/szymon/dotfiles/' to '/home/szymon/'."
 
 stow -d /home/szymon/dotfiles/ -t /home/szymon/ .
 
 if test $status -eq 0
-    echo Succes
+    echo "Succes!"
+    echo "Remember to add new and modified files to repo."
     return 0
 else
-    echo "ERROR: Stow exited with exit code: $status"
+    echo "ERROR: Stow exited with exit code: $status."
     return 1
 end
