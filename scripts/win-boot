@@ -1,23 +1,47 @@
 #!/usr/bin/env fish
 
-echo "Seting BootNext to windows."
+function check_root
+    if not fish_is_root_user
+        echo "ERROR: Script must be run as root."
+        exit 1
+    end
+end
 
-begin
-    efibootmgr -n 0003
-end &>/dev/null
+function boot_win
+    begin
+        efibootmgr -n 0003
+    end &>/dev/null
+end
 
-if test $status -eq 0
-    echo "SUCCES: Rebooting in 3 seconds! CTRL + C TO CANCEL"
-    sleep 3
-    reboot
-    exit 0
-else
-    echo "ERROR: Efibootmgr exited with: $status."
-    echo "Seting BootNext back to linux."
+function boot_win_error
+    boot_win
+
+    if test $status -eq 0
+        echo "SUCCES: Rebooting in 5 seconds! CTRL + C TO CANCEL"
+        for i in (seq 5 -1 1)
+            sleep 1 &
+            echo $i
+            wait sleep
+        end
+        #reboot
+        exit 0
+    else
+        echo "ERROR: Efibootmgr exited with: $status."
+    end
+
+    boot_linux_error
+end
+
+function boot_linux
+    echo "Seting BootNext to linux."
 
     begin
         efibootmgr -n 0000
     end &>/dev/null
+end
+
+function boot_linux_error
+    boot_linux
 
     if test $status -ne 0
         echo "ERROR: Efibootmgr exited with: $status."
@@ -27,3 +51,31 @@ else
         exit 1
     end
 end
+
+function boot_linux_sigint_error
+    boot_linux_sigint
+
+    if test $status -ne 0
+        echo "ERROR: Efibootmgr exited with: $status."
+        echo "Could not set BootNext back to linux."
+        exit 1
+    else
+        exit 0
+    end
+end
+
+function boot_linux_sigint
+    echo \n"Seting BootNext to linux."
+
+    begin
+        efibootmgr -n 0000
+    end &>/dev/null
+end
+
+check_root
+
+echo "Seting BootNext to windows."
+
+trap boot_linux_sigint_error SIGINT
+
+boot_win_error
