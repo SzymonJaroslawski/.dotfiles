@@ -1,7 +1,29 @@
 #!/usr/bin/env fish
 
-efibootmgr -n 0003
+echo "Seting BootNext to windows."
+
+begin
+    efibootmgr -n 0003
+end &>/dev/null
 
 if test $status -eq 0
-    echo Rebooting
+    echo "SUCCES: Rebooting in 3 seconds! CTRL + C TO CANCEL"
+    sleep 3
+    reboot
+    exit 0
+else
+    echo "ERROR: Efibootmgr exited with: $status."
+    echo "Seting BootNext back to linux."
+
+    begin
+        efibootmgr -n 0000
+    end &>/dev/null
+
+    if test $status -ne 0
+        echo "ERROR: Efibootmgr exited with: $status."
+        echo "Could not set BootNext back to linux."
+        exit 2
+    else
+        exit 1
+    end
 end
