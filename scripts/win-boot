@@ -1,0 +1,7 @@
+#!/usr/bin/env fish
+
+efibootmgr -n 0003
+
+if test $status -eq 0
+    echo Rebooting
+end
