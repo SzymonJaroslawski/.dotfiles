@@ -23,7 +23,7 @@ function boot_win_error
             echo $i
             wait sleep
         end
-        #reboot
+        reboot
         exit 0
     else
         echo "ERROR: Efibootmgr exited with: $status."
